@@ -11,26 +11,31 @@ from collections import Counter
 
 from knowledge_base.SAPDocumentationPopulator import SAPDocumentationPopulator
 
-load_serialized_kb = False
+# load serialized KB rather than populating (RECOMMENDED = True)
+load_serialized_kb = True
+kb_serial_file = "input/knowledgebase/serializedkb.ser"
+
+# strictness of matching predicate as veried in PoC
+STRICT_MATCHING_PREDICATE = True
+
+# expert settings
 EQUAL_BOS_IN_POPULATION = False
-EQUAL_BOS_IN_ANOMALY_CHECKS = False
-HEURISTIC_PARSER = False
-kb_serial_file = "input/serializedkb_bos_heuristic_no_telco.ser"
-# kb_serial_file = "input/serializedkb.ser"
+HEURISTIC_PARSER = True
+
 
 
 # Stores which tag is used in respective log to capture the event name
 logs = {
-    # "Hospital Billing - Event Log.xes": "concept:name",
-    # "BPIC15_1.xes": "activityNameEN",
-    # "BPIC15_2.xes": "activityNameEN",
-    # "BPIC15_3.xes": "activityNameEN",
-    # "BPIC15_4.xes": "activityNameEN",
-    # "BPIC15_5.xes": "activityNameEN",
-    # "BPI_2014.xes": "concept:name",
-    # "BPI_2018.xes": "concept:name",
-    # "Road_Traffic_Fine_Management_Process.xes": "concept:name",
-    # "financial_log_modified.xes": "concept:new_name",
+    "Hospital Billing - Event Log.xes": "concept:name",
+    "BPIC15_1.xes": "activityNameEN",
+    "BPIC15_2.xes": "activityNameEN",
+    "BPIC15_3.xes": "activityNameEN",
+    "BPIC15_4.xes": "activityNameEN",
+    "BPIC15_5.xes": "activityNameEN",
+    "BPI_2014.xes": "concept:name",
+    "BPI_2018.xes": "concept:name",
+    "Road_Traffic_Fine_Management_Process.xes": "concept:name",
+    "financial_log_modified.xes": "concept:new_name",
     "admission/admission tu munich.xes": "concept:name",
     "admission/admission cologne.xes": "concept:name",
     "admission/admission frankfurt.xes": "concept:name",
@@ -76,7 +81,7 @@ def _populate_knowledge_base(knowledge_base):
         # populator.populate(knowledge_base, os.path.abspath(dir) + "/" + file)
 
     # from SAP collection
-    dir = "input/knowledgebase/SAP/"
+    dir = "input/knowledgebase/sapmodels/"
     files = os.listdir(dir)
     files = [f for f in files if f.endswith("pnml")]
     for i, file in enumerate(files):
@@ -87,14 +92,10 @@ def _populate_knowledge_base(knowledge_base):
     # from SAP lifecycles
     populator = SAPDocumentationPopulator()
     populator.populate(knowledge_base, "input/knowledgebase/lifecycles/lifecycles.csv")
-    populator.populate(knowledge_base, "input/knowledgebase/lifecycles/lifecycles2.csv")
 
     # from work pattern work items
     populator = WorkItemPopulator(10)
     populator.populate(knowledge_base)
-
-    # from other sources.
-    # ...
 
 
 def main():
@@ -105,25 +106,12 @@ def main():
         pass
 
     for log_file in logs.keys():
-        print("loading event log", log_file)
-        log = xes_import_factory.apply(f"input/logs/{log_file}")
-        # print_parsed_labels(log, logs[log_file])
-        analyze_event_log(knowledgebase, log, log_file, logs[log_file], EQUAL_BOS_IN_ANOMALY_CHECKS)
+        filepath = f"input/logs/{log_file}"
+        if os.path.exists(filepath):
+            print("loading event log", log_file)
+            log = xes_import_factory.apply(filepath)
+            analyze_event_log(knowledgebase, log, log_file, logs[log_file], STRICT_MATCHING_PREDICATE)
     print('done')
-
-
-def print_parsed_labels(log, event_key):
-    seen = []
-    for trace in log:
-        for event in trace:
-            name = str(event[event_key]).lower()
-            if name not in seen:
-                parse = parser.parse_label(name)
-                seen.append(name)
-    seen.sort()
-    for name in seen:
-        parse = parser.parse_label(name)
-        print(name, ";", parse.actions, ";", parse.bos)
 
 
 def analyze_event_log(knowledgebase, log, log_name, event_key, equal_bos):
@@ -225,7 +213,7 @@ def get_output_file_name():
         output_string = output_string + "EqBosInPop_"
     else:
         output_string = output_string + "NoEqBosInPop_"
-    if EQUAL_BOS_IN_ANOMALY_CHECKS:
+    if STRICT_MATCHING_PREDICATE:
         output_string = output_string + "EqBosInCheck_"
     else:
         output_string = output_string + "NoEqBosInCheck_"
