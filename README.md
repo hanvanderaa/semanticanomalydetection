@@ -1,6 +1,6 @@
 # semanticanomalydetection
 
-This repository presents the implementation employed in the proof of concept of the paper "*Detecting Semantic Execution Anomalies in Event Logs*" by Han van der Aa and Henrik Leopold, currently under submission the BPM Conference (2020).
+This repository presents the implementation employed in the proof of concept of the paper "*Detecting Semantic Execution Anomalies in Event Logs*" by Han van der Aa and Henrik Leopold, currently under submission to the BPM Conference (2020).
 
 ## Libraries
 Our work employs the [PM4py](https://pm4py.fit.fraunhofer.de/)  and [NLTK](https://www.nltk.org/) libraries, which can both be installed via, for instance, *pip install*.
@@ -33,5 +33,5 @@ The detected anomalies are printed as console output and saved in a .csv file in
 
 
 
-
+## Reference
 [1] Russell, N., van der Aalst, W.M., Ter Hofstede, A.H., Edmond, D.: Workflow resource patterns: Identification, representation and tool support. In: CAiSE. pp. 216–232. Springer (2005)
