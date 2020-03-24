@@ -11,7 +11,7 @@ from collections import Counter
 from knowledge_base.CSVItemPopulator import CSVItemPopulator
 
 # load serialized KB rather than populating (RECOMMENDED = True)
-load_serialized_kb = False
+load_serialized_kb = True
 kb_serial_file = "input/knowledgebase/serializedkb.ser"
 
 # strictness of matching predicate as varied in PoC
@@ -25,13 +25,13 @@ HEURISTIC_PARSER = True
 
 # Stores which tag is used in respective log to capture the event name
 logs = {
-    "Hospital Billing - Event Log.xes": "concept:name",
+    "BPI_2012.xes": "concept:name",
+    "BPI_2014.xes": "concept:name",
     "BPIC15_1.xes": "activityNameEN",
     "BPIC15_2.xes": "activityNameEN",
     "BPIC15_3.xes": "activityNameEN",
     "BPIC15_4.xes": "activityNameEN",
     "BPIC15_5.xes": "activityNameEN",
-    "BPI_2014.xes": "concept:name",
     "BPI_2018.xes": "concept:name",
     "Road_Traffic_Fine_Management_Process.xes": "concept:name",
     "financial_log_modified.xes": "concept:new_name",
