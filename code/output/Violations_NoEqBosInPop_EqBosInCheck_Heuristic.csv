@@ -1,59 +1,5 @@
-admission/admission tu munich.xes;True;True;XOR;check documents;documents received (verbs: check---receive);1016
-admission/admission tu munich.xes;True;True;order;check documents;documents received (verbs: check---receive);479
-admission/admission tu munich.xes;True;True;co-occ;check documents;documents received;501
-admission/admission cologne.xes;True;True;XOR;check documents;documents received (verbs: check---receive);1041
-admission/admission cologne.xes;True;True;order;check documents;documents received (verbs: check---receive);185
-admission/admission cologne.xes;True;True;co-occ;check documents;documents received;101
-admission/admission frankfurt.xes;True;True;XOR;check documents;documents received (verbs: check---receive);1092
-admission/admission frankfurt.xes;True;True;order;check documents;documents received (verbs: check---receive);188
-admission/admission frankfurt.xes;True;True;XOR;certificate received;check certificate (verbs: receive---check);604
-admission/admission frankfurt.xes;True;True;order;check certificate;certificate received (verbs: check---receive);40
-admission/admission frankfurt.xes;True;True;co-occ;check documents;documents received;107
-admission/admission frankfurt.xes;True;True;co-occ;certificate received;check certificate;15
-admission/admission wuerzburg.xes;True;True;XOR;receive rejection;send rejection (verbs: receive---send);753
-admission/admission wuerzburg.xes;True;True;XOR;receive commitment;send commitment (verbs: receive---send);153
-admission/admission wuerzburg.xes;True;True;order;receive rejection;send rejection (verbs: receive---send);62
-admission/admission wuerzburg.xes;True;True;order;receive commitment;send commitment (verbs: receive---send);13
-admission/admission wuerzburg.xes;True;True;co-occ;receive rejection;send rejection;87
-admission/admission wuerzburg.xes;True;True;co-occ;receive commitment;send commitment;14
-admission/admission muenster.xes;True;True;XOR;receive application form;send application form (verbs: receive---send);505
-admission/admission muenster.xes;True;True;XOR;receive rejection;send rejection (verbs: receive---send);216
-admission/admission muenster.xes;True;True;XOR;receive acceptance;send acceptance (verbs: receive---send);256
-admission/admission muenster.xes;True;True;order;receive application form;send application form (verbs: receive---send);35
-admission/admission muenster.xes;True;True;order;receive acceptance;send acceptance (verbs: receive---send);7
-admission/admission muenster.xes;True;True;order;receive rejection;send rejection (verbs: receive---send);10
-admission/admission muenster.xes;True;True;co-occ;receive application form;send application form;19
-admission/admission muenster.xes;True;True;co-occ;receive rejection;send rejection;8
-admission/admission muenster.xes;True;True;co-occ;receive acceptance;send acceptance;8
-admission/admission potsdam.xes;True;True;XOR;receive application;send application (verbs: receive---send);966
-admission/admission potsdam.xes;True;True;order;send application;complete application (verbs: send---complete);97
-admission/admission potsdam.xes;True;True;XOR;receive acceptance;send acceptance (verbs: receive---send);332
-admission/admission potsdam.xes;True;True;order;receive application;send application (verbs: receive---send);47
-admission/admission potsdam.xes;True;True;order;receive acceptance;send acceptance (verbs: receive---send);9
-admission/admission potsdam.xes;True;True;co-occ;receive application;send application;54
-admission/admission potsdam.xes;True;True;co-occ;receive acceptance;send acceptance;5
-admission/admission iis erlangen.xes;True;True;XOR;receive application;send application (verbs: receive---send);971
-admission/admission iis erlangen.xes;True;True;order;receive application;send application (verbs: receive---send);46
-admission/admission iis erlangen.xes;True;True;XOR;receive application;reject application (verbs: receive---reject);1140
-admission/admission iis erlangen.xes;True;True;XOR;reject application;send application (verbs: reject---send);1120
 admission/admission iis erlangen.xes;True;True;XOR;receive acceptance;receive rejection (verbs: acceptance---rejection);924
-admission/admission iis erlangen.xes;True;True;order;receive acceptance;send acceptance (verbs: receive---send);288
-admission/admission iis erlangen.xes;True;True;XOR;receive acceptance;send acceptance (verbs: receive---send);1353
 admission/admission iis erlangen.xes;True;True;XOR;accept application;reject application (verbs: accept---reject);915
-admission/admission iis erlangen.xes;True;True;XOR;receive rejection;send rejection (verbs: receive---send);1458
 admission/admission iis erlangen.xes;True;True;XOR;send acceptance;send rejection (verbs: acceptance---rejection);917
-admission/admission iis erlangen.xes;True;True;order;receive rejection;send rejection (verbs: receive---send);200
-admission/admission iis erlangen.xes;True;True;order;send application;complete application (verbs: send---complete);60
-admission/admission iis erlangen.xes;True;True;co-occ;receive rejection;send rejection;30
-admission/admission iis erlangen.xes;True;True;co-occ;receive application;send application;59
-admission/admission iis erlangen.xes;True;True;co-occ;receive acceptance;send acceptance;5
-admission/admission fu berlin.xes;True;True;XOR;receive application;send application (verbs: receive---send);1005
-admission/admission fu berlin.xes;True;True;order;send application;complete application (verbs: send---complete);41
-admission/admission fu berlin.xes;True;True;XOR;receive rejection;send rejection (verbs: receive---send);16009
 admission/admission fu berlin.xes;True;True;XOR;send acceptance;send rejection (verbs: acceptance---rejection);15897
-admission/admission fu berlin.xes;True;True;order;receive rejection;send rejection (verbs: receive---send);5588
 admission/admission fu berlin.xes;True;True;XOR;receive acceptance;receive rejection (verbs: acceptance---rejection);15861
-admission/admission fu berlin.xes;True;True;XOR;receive acceptance;send acceptance (verbs: receive---send);15743
-admission/admission fu berlin.xes;True;True;order;receive acceptance;send acceptance (verbs: receive---send);5054
-admission/admission fu berlin.xes;True;True;order;receive application;send application (verbs: receive---send);30
-admission/admission fu berlin.xes;True;True;co-occ;receive application;send application;25

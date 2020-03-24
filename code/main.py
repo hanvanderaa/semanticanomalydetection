@@ -2,23 +2,22 @@ import os
 from knowledge_base.KnowledgeBase import KnowledgeBase
 from knowledge_base.PetriNetKBPopulator import PetriNetKBPopulator
 from pm4py.objects.log.importer.xes import factory as xes_import_factory
-from knowledge_base.WorkItemPopulator import WorkItemPopulator
 import labelparser.labelparser as lp
 import warnings
 import pickle
 import csv
 from collections import Counter
 
-from knowledge_base.SAPDocumentationPopulator import SAPDocumentationPopulator
+from knowledge_base.CSVItemPopulator import CSVItemPopulator
 
 # load serialized KB rather than populating (RECOMMENDED = True)
-load_serialized_kb = True
+load_serialized_kb = False
 kb_serial_file = "input/knowledgebase/serializedkb.ser"
 
-# strictness of matching predicate as veried in PoC
+# strictness of matching predicate as varied in PoC
 STRICT_MATCHING_PREDICATE = True
 
-# expert settings
+# expert settings (RECOMMENDED = False, True)
 EQUAL_BOS_IN_POPULATION = False
 HEURISTIC_PARSER = True
 
@@ -90,12 +89,12 @@ def _populate_knowledge_base(knowledge_base):
         populator.populate(knowledge_base, os.path.abspath(dir) + "/" + file)
 
     # from SAP lifecycles
-    populator = SAPDocumentationPopulator()
-    populator.populate(knowledge_base, "input/knowledgebase/lifecycles/lifecycles.csv")
+    populator = CSVItemPopulator()
+    populator.populate(knowledge_base, "input/knowledgebase/lifecycles/sap_lib_lifecycles.csv")
 
     # from work pattern work items
-    populator = WorkItemPopulator(10)
-    populator.populate(knowledge_base)
+    populator = CSVItemPopulator()
+    populator.populate(knowledge_base, "input/knowledgebase/lifecycles/work_item_lifecycles.csv")
 
 
 def main():
