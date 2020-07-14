@@ -1,25 +1,33 @@
 import os
-from knowledge_base.KnowledgeBase import KnowledgeBase
-from knowledge_base.PetriNetKBPopulator import PetriNetKBPopulator
-from pm4py.objects.log.importer.xes import factory as xes_import_factory
-import labelparser.labelparser as lp
-import warnings
 import pickle
 import csv
-from collections import Counter
+import sys
 
-from knowledge_base.CSVItemPopulator import CSVItemPopulator
+from knowledgebase_population import verboceanpopulator
+from knowledgebase_population.bpmnpopulator import BPMNPopulator
+from knowledgebase.knowledgebase import KnowledgeBase
+from knowledgebase_population.petrinetpopulator import PetriNetKBPopulator
+from pm4py.objects.log.importer.xes import importer as xes_importer
+from anomalydetection.anomalydetector import AnomalyDetector
 
-# load serialized KB rather than populating (RECOMMENDED = True)
-load_serialized_kb = True
-kb_serial_file = "input/knowledgebase/serializedkb.ser"
 
-# strictness of matching predicate as varied in PoC
-STRICT_MATCHING_PREDICATE = True
+# KNOWLEDGE_BASE_SETTINGS
+# load serialized KB rather than populating (RECOMMENDED = True, file: icpmKB.ser)
+LOAD_SERIALIZED_KB = True
+KB_SERIAL_FILE = "input/serializedkbs/icpmKB.ser"
+# population settings (RECOMMENDED = True, True)
+EQUAL_BOS_IN_POPULATION = True
+FILTER_KB = True
+# set options for population (does not work when loading serialized)
+# (recommended = True, True, True)
+use_SAP_models = True
+use_BPMAI_models = False
+use_verbocean = False
+# only repopulate KB instead of detecting anomalies
+ONLY_POPULATE_KB = False
 
-# expert settings (RECOMMENDED = False, True)
-EQUAL_BOS_IN_POPULATION = False
-HEURISTIC_PARSER = True
+# use less precise (heuristic) parsing (recommended = False)
+HEURISTIC_PARSER = False
 
 
 
@@ -27,184 +35,85 @@ HEURISTIC_PARSER = True
 logs = {
     "BPI_2012.xes": "concept:name",
     "BPI_2014.xes": "concept:name",
-    "BPIC15_1.xes": "activityNameEN",
-    "BPIC15_2.xes": "activityNameEN",
-    "BPIC15_3.xes": "activityNameEN",
-    "BPIC15_4.xes": "activityNameEN",
-    "BPIC15_5.xes": "activityNameEN",
+    "BPIC15_1.xes.xml": "activityNameEN",
+    "BPIC15_2.xes.xml": "activityNameEN",
+    "BPIC15_3.xes.xml": "activityNameEN",
+    "BPIC15_4.xes.xml": "activityNameEN",
+    "BPIC15_5.xes.xml": "activityNameEN",
     "BPI_2018.xes": "concept:name",
-    "Road_Traffic_Fine_Management_Process.xes": "concept:name",
-    "financial_log_modified.xes": "concept:new_name",
-    "admission/admission tu munich.xes": "concept:name",
-    "admission/admission cologne.xes": "concept:name",
-    "admission/admission frankfurt.xes": "concept:name",
-    "admission/admission wuerzburg.xes": "concept:name",
-    "admission/admission muenster.xes": "concept:name",
-    "admission/admission potsdam.xes": "concept:name",
-    "admission/admission hohenheim.xes": "concept:name",
-    "admission/admission iis erlangen.xes": "concept:name",
-    "admission/admission fu berlin.xes": "concept:name"
+    "admission/admission iis erlangen.xes": "concept:name"
 }
 
-
-parser = lp.load_default_parser()
-
-
-def obtain_knowledge_base():
-    if not load_serialized_kb:
-        kb = KnowledgeBase()
-        _populate_knowledge_base(kb)
-        pickle.dump(kb, open(kb_serial_file, "wb"))
-        return kb
-    else:
-        kb = pickle.load(open(kb_serial_file, "rb"))
-        print("loaded knowledge base from", kb_serial_file)
-        return kb
-
-
-def _populate_knowledge_base(knowledge_base):
-    # Ignore deprication warnings from pm4py net import
-    def warn(*args, **kwargs):
-        pass
-
-    warnings.warn = warn
-
-    # from process model collection.
-    populator = PetriNetKBPopulator(equal_bos=EQUAL_BOS_IN_POPULATION, heuristic_parser=HEURISTIC_PARSER)
-    dir = "input/knowledgebase/telecommodels/"
-    files = os.listdir(dir)
-    files = [f for f in files if f.endswith("pnml")]
-    for i, file in enumerate(files):
-        print(f"({i}) --------------")
-        print(dir + file)
-        # populator.populate(knowledge_base, os.path.abspath(dir) + "/" + file)
-
-    # from SAP collection
-    dir = "input/knowledgebase/sapmodels/"
-    files = os.listdir(dir)
-    files = [f for f in files if f.endswith("pnml")]
-    for i, file in enumerate(files):
-        print(f"({i}) --------------")
-        print(dir + file)
-        populator.populate(knowledge_base, os.path.abspath(dir) + "/" + file)
-
-    # from SAP lifecycles
-    populator = CSVItemPopulator()
-    populator.populate(knowledge_base, "input/knowledgebase/lifecycles/sap_lib_lifecycles.csv")
-
-    # from work pattern work items
-    populator = CSVItemPopulator()
-    populator.populate(knowledge_base, "input/knowledgebase/lifecycles/work_item_lifecycles.csv")
-
-
 def main():
-    knowledgebase = obtain_knowledge_base()
+    kb = obtain_knowledge_base()
+    if ONLY_POPULATE_KB:
+        sys.exit()
 
-    #Create new output file
+    # Create new output file
     with open("output/" + get_output_file_name(), 'w', newline='') as csvfile:
-        pass
+        writer = csv.writer(csvfile, delimiter=';')
+        header = ["log", "anomaly type", "event1", "event2", "verb1", "verb2", "record_conf", "anomaly_count"]
+        writer.writerow(header)
 
-    for log_file in logs.keys():
-        filepath = f"input/logs/{log_file}"
-        if os.path.exists(filepath):
-            print("loading event log", log_file)
-            log = xes_import_factory.apply(filepath)
-            analyze_event_log(knowledgebase, log, log_file, logs[log_file], STRICT_MATCHING_PREDICATE)
+    for log_name in logs.keys():
+        log_file = f"input/logs/{log_name}"
+        if os.path.exists(log_file):
+            print("\nloading event log", log_name)
+            log = xes_importer.apply(log_file)
+            print("detecting anomalies")
+            detector = AnomalyDetector(kb, log, log_name, logs[log_name], True, HEURISTIC_PARSER)
+            anomaly_counter = detector.detect_anomalies()
+            #   write results to file (and stdout)
+            with open("output/" + get_output_file_name(), 'a', newline='') as csvfile:
+                writer = csv.writer(csvfile, delimiter=';')
+                for anomaly in anomaly_counter:
+                    row = [log_name]
+                    row.extend(anomaly.to_array())
+                    row.append(anomaly_counter[anomaly])
+                    writer.writerow(row)
+                    print(anomaly, "count:", anomaly_counter[anomaly])
     print('done')
 
 
-def analyze_event_log(knowledgebase, log, log_name, event_key, equal_bos):
-    violation_counter = Counter()
-    parse_map = {}
-    paired_violation_map = {}
-    coocc_pairs = set()
-    print("checking for anomalies in", log_name, "with", len(log), "traces")
-    for id in range(len(log)):
-        trace = log[id]
-        for i in range(len(trace) - 1):
-            event1_name = str(trace[i][event_key]).lower()
+def obtain_knowledge_base():
+    if not LOAD_SERIALIZED_KB:
+        kb = _populate_knowledge_base()
+        pickle.dump(kb, open(KB_SERIAL_FILE, "wb"))
+        if FILTER_KB:
+            kb.filter_out_conflicting_records()
+        return kb
+    else:
+        kb = pickle.load(open(KB_SERIAL_FILE, "rb"))
+        print("loaded knowledge base from", KB_SERIAL_FILE)
+        if FILTER_KB:
+            kb.filter_out_conflicting_records()
+        return kb
 
-            for j in range(i + 1, len(trace)):
-                event2_name = str(trace[j][event_key]).lower()
 
-                # Check event pair ...
-                if event1_name != event2_name:
-                    violations = set()
-                    # check if event pair already observed
-                    if (event1_name, event2_name) in paired_violation_map:
-                        violations = paired_violation_map[(event1_name, event2_name)]
-                    else:
-                        if not HEURISTIC_PARSER:
-                        # Parse events
-                            e1_parse = parse_event(event1_name, parse_map)
-                            e2_parse = parse_event(event2_name, parse_map)
+def _populate_knowledge_base():
+    kb = KnowledgeBase()
 
-                            # If both contain an action, extract them ...
-                            if not equal_bos or e1_parse.bos == e2_parse.bos:
-                                if len(e1_parse.actions) > 0 and len(e2_parse.actions) > 0:
-                                    verb1 = e1_parse.actions[0]
-                                    verb2 = e2_parse.actions[0]
-                                    # ... and identify anomalies.
-                                    if knowledgebase.exclusion_violation(verb1, verb2):
-                                        if verb1 <  verb2:
-                                            violations.add("XOR: " + event1_name + "---" + event2_name + " (verbs: " + verb1 + "---" + verb2 + ")")
-                                        else:
-                                            violations.add("XOR: " + event2_name + "---" + event1_name + " (verbs: " + verb2 + "---" + verb1 + ")")
-                                    if knowledgebase.ordering_violation(verb1, verb2):
-                                        violations.add(
-                                            "order: " + event1_name + "---" + event2_name + " (verbs: " + verb1 + "---" + verb2 + ")")
-                                    if knowledgebase.co_occurrence_violation(verb1, verb2):
-                                        coocc_pairs.add((event1_name, event2_name))
-                                        coocc_pairs.add((event2_name, event1_name))
+    if use_BPMAI_models:
+        # from ai collection
+        ai_dir = "input/knowledgebase/bpmai/models"
+        populator = BPMNPopulator(equal_bos=EQUAL_BOS_IN_POPULATION, heuristic_parser=HEURISTIC_PARSER)
+        populator.populate(kb, ai_dir)
 
-                        if HEURISTIC_PARSER:
-                            if lp.differ_by_one_word(event1_name, event2_name):
-                                (verb1, verb2) = lp.get_differences(event1_name, event2_name)
-                                if knowledgebase.exclusion_violation(verb1, verb2) or lp.differ_by_negation(event1_name, event2_name):
-                                    if event1_name < event2_name:
-                                        violations.add("XOR: " + event1_name + "---" + event2_name + " (verbs: " + verb1 + "---" + verb2 + ")")
-                                    else:
-                                        violations.add("XOR: " + event2_name + "---" + event1_name + " (verbs: " + verb2 + "---" + verb1 + ")")
-                                if knowledgebase.ordering_violation(verb1, verb2):
-                                    violations.add(
-                                        "order: " + event1_name + "---" + event2_name + " (verbs: " + verb1 + "---" + verb2 + ")")
-                                if knowledgebase.co_occurrence_violation(verb1, verb2):
-                                    coocc_pairs.add((event1_name, event2_name))
-                                    coocc_pairs.add((event2_name, event1_name))
-                        paired_violation_map[(event1_name, event2_name)] = violations
-                    for violation in violations:
-                        violation_counter[violation] += 1
-    # check for co-occurrence violations
-    for id in range(len(log)):
-        trace = log[id]
-        event_names = [str(event[event_key]).lower() for event in trace]
-        for event in event_names:
-            for (e1, e2) in coocc_pairs:
-                if event == e1 and e2 not in event_names:
-                    if e1 < e2:
-                        violation = "co-occ: " + e1 + "---" + e2
-                        violation_counter[violation] += 1
-                    else:
-                        violation = "co-occ: " + e2 + "---" + e1
-                        violation_counter[violation] += 1
+    if use_SAP_models:
+        # from SAP collection
+        populator = PetriNetKBPopulator(equal_bos=EQUAL_BOS_IN_POPULATION, heuristic_parser=HEURISTIC_PARSER)
+        sap_dir = "input/knowledgebase/sapmodels/"
+        files = os.listdir(sap_dir)
+        files = [f for f in files if f.endswith("pnml")]
+        for i, file in enumerate(files):
+            print(f"({i}) --------------")
+            print(sap_dir + file)
+            populator.populate(kb, os.path.abspath(sap_dir) + "/" + file)
 
-    # write results to file (and stdout)
-    file_name = ""
-    with open("output/" + get_output_file_name(), 'a', newline='') as csvfile:
-        writer = csv.writer(csvfile, delimiter=';')
-        for violation in violation_counter:
-            writer.writerow([log_name,equal_bos,HEURISTIC_PARSER,
-                             violation[:violation.find(":")],
-                             violation[violation.find(": ")+2:violation.find("---")],
-                             violation[violation.find("---")+3:],
-                             violation_counter[violation]])
-            print(violation, "count:", violation_counter[violation])
-
-def parse_event(event_name, parse_map):
-    if event_name not in parse_map:
-        parse_map[event_name] = parser.parse_label(event_name)
-    return parse_map[event_name]
-
+    if use_verbocean:
+        # from verbocean records
+        verboceanpopulator.populate(kb, "input/knowledgebase/verbocean.txt", count_per_record= 1000)
+    return kb
 
 def get_output_file_name():
     output_string = "Violations_"
@@ -212,15 +121,13 @@ def get_output_file_name():
         output_string = output_string + "EqBosInPop_"
     else:
         output_string = output_string + "NoEqBosInPop_"
-    if STRICT_MATCHING_PREDICATE:
-        output_string = output_string + "EqBosInCheck_"
-    else:
-        output_string = output_string + "NoEqBosInCheck_"
+    output_string = output_string + "EqBosInCheck_"
     if HEURISTIC_PARSER:
         output_string = output_string + "Heuristic.csv"
     else:
         output_string = output_string + "NoHeuristic.csv"
     return output_string
+
 
 if __name__ == '__main__':
     main()

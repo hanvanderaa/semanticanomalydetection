@@ -1,0 +1,2 @@
+The .json files from the BPM Academic Initiative go here. Available at: https://doi.org/10.5281/zenodo.3758705
+However, we recommend to use the pre-populated knowledge base located at code/input/serializedkbs/icpmKB.ser

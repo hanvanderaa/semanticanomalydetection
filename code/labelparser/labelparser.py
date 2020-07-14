@@ -135,7 +135,7 @@ class LabelParser():
         return [self.tags[i] for i in tokens[::-1]]
 
     def parse_label(self, label):
-        predicted_tags = self._viterbi(label.split())
+        predicted_tags = self._viterbi(split_label(label))
         predicted_style = vote_style(predicted_tags)
         result = ParsedLabel(label, predicted_tags)
         # print('label', label, 'tags', predicted_tags, 'style', predicted_style)
@@ -146,7 +146,7 @@ class LabelParser():
 class ParsedLabel():
     def __init__(self, label, tags):
         self.label = label
-        self.splitlabel = label.split()
+        self.splitlabel = split_label(label)
         self.tags = tags
         self.bos = self.findObjects(self.tags)
         self.actions = self.findActions(self.tags)
@@ -312,6 +312,7 @@ def load_default_parser():
 
 
 def split_label(label):
+    # result = label.replace('_', ' ', regex=False)
     result = re.split('[^a-zA-Z]', label)
     result = [w.lower() for w in result]
     return result
@@ -325,7 +326,7 @@ def split_and_lemmatize_label(label):
 
 def lemmatize_word(word):
     lemma = lemmatizer.lemmatize(word, pos='v')
-    lemma = lemmatizer.lemmatize(lemma, pos='n')
+    # lemma = lemmatizer.lemmatize(lemma, pos='n')
     return lemma
 
 
@@ -354,10 +355,3 @@ def get_differences(label1, label2):
     if len(diff1) == 1 and len(diff2) == 1:
         return "".join(diff1), "".join(diff2)
     return "", ""
-
-    # if diff1 == ["not"]:
-    #     index = list1.index("not")
-    #     return "not " + list1[index + 1], list1[index + 1]
-    # if diff2 == ["not"]:
-    #     index = list2.index("not")
-    #     return "not " + list2[index + 1], list2[index + 1]

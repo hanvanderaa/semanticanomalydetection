@@ -1,0 +1,2 @@
+The SAP Reference collection .epml files should go here. These are widespread, semi-publicly available
+However, in any case, it is recommended to use the pre-populated knowledge base in input/serializedkbs.

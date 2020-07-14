@@ -1,5 +1,0 @@
-admission/admission iis erlangen.xes;True;True;XOR;receive acceptance;receive rejection (verbs: acceptance---rejection);924
-admission/admission iis erlangen.xes;True;True;XOR;accept application;reject application (verbs: accept---reject);915
-admission/admission iis erlangen.xes;True;True;XOR;send acceptance;send rejection (verbs: acceptance---rejection);917
-admission/admission fu berlin.xes;True;True;XOR;send acceptance;send rejection (verbs: acceptance---rejection);15897
-admission/admission fu berlin.xes;True;True;XOR;receive acceptance;receive rejection (verbs: acceptance---rejection);15861

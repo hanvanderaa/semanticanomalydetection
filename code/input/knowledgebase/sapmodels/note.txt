@@ -1,0 +1,2 @@
+For manual knowledge base population, the SAP Reference collection .epml files should go here. These are widespread, semi-publicly available.
+However, we recommend to use the pre-populated knowledge base located at code/input/serializedkbs/icpmKB.ser
